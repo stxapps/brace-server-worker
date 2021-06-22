@@ -1,0 +1,18 @@
+{
+  "name": "brace-server-worker",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "version": "node --version",
+    "start": "node index.js",
+    "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/brace-001-bbafee694b1c.json node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/datastore": "^6.4.1",
+    "@google-cloud/storage": "^5.8.5",
+    "puppeteer": "^10.0.0",
+    "puppeteer-extra": "^3.1.18",
+    "puppeteer-extra-plugin-stealth": "^2.7.8",
+    "url-parse": "^1.5.1"
+  }
+}
