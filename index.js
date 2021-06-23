@@ -16,6 +16,8 @@ const datastore = new Datastore();
 const storage = new Storage();
 const bucket = storage.bucket(BUCKET_NAME);
 
+let browser;
+
 const getExtractedResultEntities = (status) => new Promise((resolve, reject) => {
   const query = datastore.createQuery(DATASTORE_KIND);
   query.filter('status', status);
@@ -25,8 +27,6 @@ const getExtractedResultEntities = (status) => new Promise((resolve, reject) => 
     else resolve(entities)
   });
 });
-
-let browser;
 
 const saveImage = (image) => new Promise((resolve, reject) => {
 
@@ -52,7 +52,9 @@ const _extract = async (url, logKey, seq) => {
 
   const res = {};
 
-  if (!browser) browser = await puppeteer.launch({ headless: true });
+  // Can't do it here! As awaiting, browser is still undefined,
+  //   other async processes will still launch it.
+  //if (!browser) browser = await puppeteer.launch({ headless: true });
 
   const context = await browser.createIncognitoBrowserContext();
   const page = await context.newPage();
@@ -174,6 +176,11 @@ const _main = async () => {
 
   const entities = await getExtractedResultEntities(EXTRACT_INIT);
   console.log(`(${logKey}) Got ${entities.length} ExtractedResult entities`);
+
+  if (entities.length > 0) {
+    console.log(`(${logKey}) There are entities, launching Puppeteer`);
+    if (!browser) browser = await puppeteer.launch({ headless: true });
+  }
 
   const results = [];
   for (let i = 0, j = entities.length; i < j; i += N_EXTRACTS) {
