@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "version": "node --version",
+    "diff": "diff const.js ../brace-server/const.js && diff utils.js ../brace-server/utils.js",
     "start": "node index.js",
     "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/brace-001-bbafee694b1c.json node index.js"
   },

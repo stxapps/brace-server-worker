@@ -167,10 +167,10 @@ const extract = async (extractedResultEntity, logKey, seq) => {
   return extractedResult;
 };
 
-const main = () => {
-  const addedDT = Date.now();
-  const logKey = `${addedDT}-${randomString(4)}`;
-  console.log(`(${logKey}) Worker starts`);
+const main = async () => {
+  const startDT = new Date();
+  const logKey = `${startDT.getTime()}-${randomString(4)}`;
+  console.log(`(${logKey}) Worker starts on ${startDT.toISOString()}`);
 
   const entities = await getExtractedResultEntities(EXTRACT_INIT);
   console.log(`(${logKey}) Got ${entities.length} ExtractedResult entities`);
@@ -188,6 +188,7 @@ const main = () => {
   const nSuccesses = results.filter(result => result.status === EXTRACT_OK).length;
   console.log(`(${logKey}) Finished extracting ${entities.length} entities with ${nSuccesses} success.`);
 
+  const endDT = new Date();
   let errorSamples = '';
   if (results.length > 0) {
     const _errorSamples = results.filter(result => result.status === EXTRACT_ERROR)
@@ -198,14 +199,13 @@ const main = () => {
   await datastore.save({
     key: datastore.key(['ExtractedLog', logKey]),
     data: {
-      dt: new Date(), nEntities: entities.length, nSuccesses, errorSamples,
+      startDT, endDT, nEntities: entities.length, nSuccesses, errorSamples,
     },
   });
   console.log(`(${logKey}) Saved extracted log to datastore.`);
 
-  console.log(`(${logKey}) Worker finishes and will be terminated.`);
-  // Terminate itself
-
+  console.log(`(${logKey}) Worker finishes on ${endDT.toISOString()}.`);
+  return;
 };
 
 main();
