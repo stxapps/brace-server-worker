@@ -167,7 +167,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
   return extractedResult;
 };
 
-const main = async () => {
+const _main = async () => {
   const startDT = new Date();
   const logKey = `${startDT.getTime()}-${randomString(4)}`;
   console.log(`(${logKey}) Worker starts on ${startDT.toISOString()}`);
@@ -205,7 +205,16 @@ const main = async () => {
   console.log(`(${logKey}) Saved extracted log to datastore.`);
 
   console.log(`(${logKey}) Worker finishes on ${endDT.toISOString()}.`);
-  return;
+};
+
+const main = async () => {
+  try {
+    await _main();
+    process.exit(0);
+  } catch (e) {
+    console.log(e);
+    process.exit(1);
+  }
 };
 
 main();
