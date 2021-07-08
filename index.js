@@ -60,6 +60,7 @@ const _extract = async (url, logKey, seq) => {
   const page = await context.newPage();
   await page.setViewport({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
   try {
+    console.log(`(${logKey}-${seq}) _extract url: `, url);
     await page.goto(url, { timeout: 12000, waitUntil: 'networkidle0' });
   } catch (e) {
     if (e.name === 'TimeoutError') {
