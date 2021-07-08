@@ -107,11 +107,27 @@ const _extract = async (url, logKey, seq) => {
     const [imgWidth, imgHeight] = await img.evaluate(elem => [elem.width, elem.height]);
     const imgRatio = imgWidth / imgHeight;
     if (imgWidth > PAGE_WIDTH * 0.4 && (imgRatio >= 1.6 && imgRatio < 1.94)) {
-      res.image = await img.screenshot();
+      try {
+        res.image = await Promise.race([
+          img.screenshot(),
+          new Promise((_, reject) => setTimeout(reject, 2000))
+        ]);
+      } catch (e) {
+        throw new Error('ImgScreenshotTimeoutError');
+      }
     }
   }
   await img.dispose();
-  if (!res.image) res.image = await page.screenshot();
+  if (!res.image) {
+    try {
+      res.image = await Promise.race([
+        page.screenshot(),
+        new Promise((_, reject) => setTimeout(reject, 2000))
+      ]);
+    } catch (e) {
+      throw new Error('PageScreenshotTimeoutError');
+    }
+  }
 
   const favicon = await page.evaluate(() => {
     const el = [...document.head.getElementsByTagName('link')].filter(el => el.rel === 'icon' || el.rel === 'shortcut icon' || el.rel === 'ICON' || el.rel === 'SHORTCUT ICON').slice(-1)[0];
