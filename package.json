@@ -6,14 +6,14 @@
     "version": "node --version",
     "diff": "diff const.js ../brace-server/const.js && diff utils.js ../brace-server/utils.js",
     "start": "node index.js",
-    "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/brace-001-bbafee694b1c.json node index.js"
+    "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/legacy_credentials/brace@brace.to/adc.json node index.js"
   },
   "dependencies": {
-    "@google-cloud/datastore": "^6.4.1",
-    "@google-cloud/storage": "^5.8.5",
-    "puppeteer": "^10.0.0",
+    "@google-cloud/datastore": "^6.4.7",
+    "@google-cloud/storage": "^5.12.0",
+    "puppeteer-core": "^10.2.0",
     "puppeteer-extra": "^3.1.18",
     "puppeteer-extra-plugin-stealth": "^2.7.8",
-    "url-parse": "^1.5.1"
+    "url-parse": "^1.5.3"
   }
 }

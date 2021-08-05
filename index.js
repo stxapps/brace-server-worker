@@ -196,7 +196,9 @@ const _main = async () => {
 
   if (entities.length > 0) {
     console.log(`(${logKey}) There are entities, launching Puppeteer`);
-    if (!browser) browser = await puppeteer.launch({ headless: true });
+    // Embedded Chromium can't be launched with error spawn EACCES
+    //   Fix by sudo apt install chromium-browser and point to it with executablePath.
+    if (!browser) browser = await puppeteer.launch({ headless: true, executablePath: '/usr/bin/chromium-browser' });
   }
 
   const results = [];
