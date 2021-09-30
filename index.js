@@ -5,7 +5,7 @@ const { Storage } = require('@google-cloud/storage');
 
 const {
   randomString, extractUrl, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
-  deriveExtractedTitle, isExtractedResultComplete, canTextInDb,
+  deriveExtractedTitle, isExtractedResultComplete, canTextInDb, containRedirectWords,
 } = require('./utils');
 const {
   DATASTORE_KIND, BUCKET_NAME, N_EXTRACTS, PAGE_WIDTH, PAGE_HEIGHT,
@@ -62,9 +62,7 @@ const saveExtractedLog = async (logKey, logData) => {
   await datastore.save({ key: datastore.key(['ExtractedLog', logKey]), data: logData });
 };
 
-const _extract = async (
-  url, logKey, seq, isJsEnabled, doScreenshot, extractedResult
-) => {
+const _extract = async (url, logKey, seq, isJsEnabled, extractedResult) => {
 
   // Can't do it here! As awaiting, browser is still undefined,
   //   other async processes will still launch it.
@@ -81,6 +79,8 @@ const _extract = async (
       console.log(`(${logKey}-${seq}) _extract throws TimeoutError but continue extracting`);
     } else throw e;
   }
+
+  const { host, origin } = extractUrl(url);
 
   if (!extractedResult.title) {
     const text = await page.evaluate(() => {
@@ -113,7 +113,9 @@ const _extract = async (
     if (text) {
       const cleansedText = cleanText(text);
       if (cleansedText.length >= 10 && canTextInDb(cleansedText)) {
-        extractedResult.title = cleansedText;
+        if (isJsEnabled || !containRedirectWords(cleansedText)) {
+          extractedResult.title = cleansedText;
+        }
       }
     }
   }
@@ -128,7 +130,9 @@ const _extract = async (
     if (text) {
       const cleansedText = cleanText(text);
       if (cleansedText.length >= 10 && canTextInDb(cleansedText)) {
-        extractedResult.title = cleansedText;
+        if (isJsEnabled || !containRedirectWords(cleansedText)) {
+          extractedResult.title = cleansedText;
+        }
       }
     }
   }
@@ -137,13 +141,15 @@ const _extract = async (
     if (text) {
       const cleansedText = cleanText(text);
       if (cleansedText.length > 0 && canTextInDb(cleansedText)) {
-        extractedResult.title = cleansedText;
+        if (isJsEnabled || !containRedirectWords(cleansedText)) {
+          extractedResult.title = cleansedText;
+        }
       }
     }
   }
 
-  if (!extractedResult.image) {
-    const image = await page.evaluate(() => {
+  if (!extractedResult.image && host !== 'twitter.com') {
+    let image = await page.evaluate(() => {
       const el = [...document.head.getElementsByTagName('meta')].filter(el => {
         const values = ['twitter:image', 'og:image', 'og:image:url'];
         if (values.includes(el.getAttribute('name'))) return true;
@@ -155,9 +161,14 @@ const _extract = async (
 
       return el.getAttribute('content');
     });
-    if (image && canTextInDb(image)) extractedResult.image = image;
+    if (image && canTextInDb(image)) {
+      if (image.startsWith('//')) image = 'http:' + image;
+      if (image.startsWith('/')) image = origin + image;
+      if (!image.startsWith('http')) image = origin + '/' + image;
+      extractedResult.image = image;
+    }
   }
-  if (!extractedResult.image && doScreenshot) {
+  if (!extractedResult.image && isJsEnabled) {
     const img = await page.evaluateHandle(() => {
       return [...document.getElementsByTagName('img')].sort(
         (a, b) => b.width * b.height - a.width * a.height
@@ -182,7 +193,7 @@ const _extract = async (
     }
     await img.dispose();
   }
-  if (!extractedResult.image && doScreenshot) {
+  if (!extractedResult.image && isJsEnabled) {
     try {
       const imageData = await Promise.race([
         page.screenshot(),
@@ -208,7 +219,9 @@ const _extract = async (
       return el.getAttribute('href');
     });
     if (favicon && canTextInDb(favicon)) {
-      if (favicon.startsWith('/')) favicon = extractUrl(url).origin + favicon;
+      if (favicon.startsWith('//')) favicon = 'http:' + favicon;
+      if (favicon.startsWith('/')) favicon = origin + favicon;
+      if (!favicon.startsWith('http')) favicon = origin + '/' + favicon;
       extractedResult.favicon = favicon;
     }
   }
@@ -238,7 +251,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
 
   if (!isExtractedResultComplete(extractedResult)) {
     try {
-      await _extract(url, logKey, seq, false, false, extractedResult);
+      await _extract(url, logKey, seq, false, extractedResult);
       console.log(`(${logKey}-${seq}) _extract w/o Js finished`);
     } catch (e) {
       console.log(`(${logKey}-${seq}) _extract w/o Js throws ${e.name}: ${e.message}`);
@@ -247,7 +260,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
 
   if (!isExtractedResultComplete(extractedResult)) {
     try {
-      await _extract(url, logKey, seq, true, true, extractedResult);
+      await _extract(url, logKey, seq, true, extractedResult);
       console.log(`(${logKey}-${seq}) _extract with Js finished`);
     } catch (e) {
       console.log(`(${logKey}-${seq}) _extract with Js throws ${e.name}: ${e.message}`);

@@ -33,7 +33,9 @@ const main = async () => {
   //url = 'https://mgronline.com/';
   //url = 'https://mgronline.com/mutualfund/detail/9640000095930';
   //url = 'https://chrome.google.com/webstore/detail/responsive-viewer/inmopeiepgfljkpkidclfgbgbmfcennb';
-  url = 'https://www.forbes.com/sites/tableauapac/2020/06/23/cultivate-data-talent-to-enable-rapid-response/#3aed09a52530';
+  //url = 'https://www.forbes.com/sites/tableauapac/2020/06/23/cultivate-data-talent-to-enable-rapid-response/#3aed09a52530';
+  //url = 'https://stateofthenation.co/?p=42031';
+  url = 'https://twitter.com/Vdsxx1/status/1323716581571121156?s=09';
   await _extract(url);
 };
 
