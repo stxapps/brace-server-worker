@@ -1,8 +1,9 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { writeFile } = require('fs');
 
 const {
-  randomString, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
+  randomString, extractUrl, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
   deriveExtractedTitle, isExtractedResultComplete, canTextInDb,
 } = require('./utils');
 const {
@@ -17,13 +18,20 @@ let browser;
 
 const getExtractedResultEntities = (status) => new Promise((resolve, reject) => {
   //resolve([{ url: 'https://www.coindesk.com/policy/2021/09/27/ethereum-developer-virgil-griffith-pleads-guilty-to-conspiracy-charge-in-north-korea-sanctions-case/' }, { url: 'https://chrome.google.com/webstore/detail/responsive-viewer/inmopeiepgfljkpkidclfgbgbmfcennb' }]);
-  resolve([{ url: 'https://chrome.google.com/webstore/detail/responsive-viewer/inmopeiepgfljkpkidclfgbgbmfcennb' }]);
+  resolve([{ url: 'https://ch3plus.com/v/57692' }]);
 });
 
 const saveImage = (image) => new Promise((resolve, reject) => {
   const fname = randomString(48) + '.png';
-  const publicUrl = `${fname}`;
-  resolve(publicUrl);
+  writeFile(fname, image, { encoding: 'binary' }, (err) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+
+    const publicUrl = `${fname}`;
+    resolve(publicUrl);
+  });
 });
 
 const saveExtractedResult = async (extractedResultEntity, extractedResult) => {
@@ -169,7 +177,7 @@ const _extract = async (
   }
 
   if (!extractedResult.favicon) {
-    const favicon = await page.evaluate(() => {
+    let favicon = await page.evaluate(() => {
       const el = [...document.head.getElementsByTagName('link')].filter(el => {
         const values = ['icon', 'shortcut icon', 'ICON', 'SHORTCUT ICON'];
         if (values.includes(el.getAttribute('rel'))) return true;
@@ -179,7 +187,10 @@ const _extract = async (
 
       return el.getAttribute('href');
     });
-    if (favicon && canTextInDb(favicon)) extractedResult.favicon = favicon;
+    if (favicon && canTextInDb(favicon)) {
+      if (favicon.startsWith('/')) favicon = extractUrl(url).origin + favicon;
+      extractedResult.favicon = favicon;
+    }
   }
 
   await page.close();

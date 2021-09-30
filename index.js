@@ -4,7 +4,7 @@ const { Datastore } = require('@google-cloud/datastore');
 const { Storage } = require('@google-cloud/storage');
 
 const {
-  randomString, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
+  randomString, extractUrl, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
   deriveExtractedTitle, isExtractedResultComplete, canTextInDb,
 } = require('./utils');
 const {
@@ -33,7 +33,6 @@ const getExtractedResultEntities = (status) => new Promise((resolve, reject) => 
 });
 
 const saveImage = (image) => new Promise((resolve, reject) => {
-
   const fname = randomString(48) + '.png';
   const blob = bucket.file(fname);
   const blobStream = blob.createWriteStream({
@@ -198,7 +197,7 @@ const _extract = async (
   }
 
   if (!extractedResult.favicon) {
-    const favicon = await page.evaluate(() => {
+    let favicon = await page.evaluate(() => {
       const el = [...document.head.getElementsByTagName('link')].filter(el => {
         const values = ['icon', 'shortcut icon', 'ICON', 'SHORTCUT ICON'];
         if (values.includes(el.getAttribute('rel'))) return true;
@@ -208,7 +207,10 @@ const _extract = async (
 
       return el.getAttribute('href');
     });
-    if (favicon && canTextInDb(favicon)) extractedResult.favicon = favicon;
+    if (favicon && canTextInDb(favicon)) {
+      if (favicon.startsWith('/')) favicon = extractUrl(url).origin + favicon;
+      extractedResult.favicon = favicon;
+    }
   }
 
   await page.close();
