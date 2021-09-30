@@ -271,10 +271,11 @@ const extract = async (extractedResultEntity, logKey, seq) => {
     }
   }
 
+  extractedResult.status = EXTRACT_OK;
+
   try {
     await saveExtractedResult(extractedResultEntity, extractedResult);
     console.log(`(${logKey}-${seq}) Saved extracted result to datastore`);
-    extractedResult.status = EXTRACT_OK;
   } catch (e) {
     console.log(`(${logKey}-${seq}) Saving extracted result throws ${e.name}: ${e.message}`);
     extractedResult.status = EXTRACT_ERROR;
