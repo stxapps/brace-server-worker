@@ -8,7 +8,8 @@
     "start": "node index.js",
     "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/legacy_credentials/brace@brace.to/adc.json node index.js",
     "gen-image-name": "node bin/gen-image-name.js",
-    "lint": "node lint.js"
+    "test": "node test.js",
+    "test-headful": "node test-headful.js"
   },
   "dependencies": {
     "@google-cloud/datastore": "^6.5.0",

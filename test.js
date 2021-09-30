@@ -1,66 +1,37 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const { Datastore } = require('@google-cloud/datastore');
-const { Storage } = require('@google-cloud/storage');
 
 const {
   randomString, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
   deriveExtractedTitle, isExtractedResultComplete, canTextInDb,
 } = require('./utils');
 const {
-  DATASTORE_KIND, BUCKET_NAME, N_EXTRACTS, PAGE_WIDTH, PAGE_HEIGHT,
+  N_EXTRACTS, PAGE_WIDTH, PAGE_HEIGHT,
   EXTRACT_INIT, EXTRACT_OK, EXTRACT_ERROR, DERIVED_VALUE,
 } = require('./const');
 const { manualResults, backupResults } = require('./results');
 
 puppeteer.use(StealthPlugin());
 
-const datastore = new Datastore();
-
-const storage = new Storage();
-const bucket = storage.bucket(BUCKET_NAME);
-
 let browser;
 
 const getExtractedResultEntities = (status) => new Promise((resolve, reject) => {
-  const query = datastore.createQuery(DATASTORE_KIND);
-  query.filter('status', status);
-  query.limit(800);
-  datastore.runQuery(query, (err, entities) => {
-    if (err) reject(err);
-    else resolve(entities)
-  });
+  //resolve([{ url: 'https://www.coindesk.com/policy/2021/09/27/ethereum-developer-virgil-griffith-pleads-guilty-to-conspiracy-charge-in-north-korea-sanctions-case/' }, { url: 'https://chrome.google.com/webstore/detail/responsive-viewer/inmopeiepgfljkpkidclfgbgbmfcennb' }]);
+  resolve([{ url: 'https://chrome.google.com/webstore/detail/responsive-viewer/inmopeiepgfljkpkidclfgbgbmfcennb' }]);
 });
 
 const saveImage = (image) => new Promise((resolve, reject) => {
-
   const fname = randomString(48) + '.png';
-  const blob = bucket.file(fname);
-  const blobStream = blob.createWriteStream({
-    resumable: false,
-    metadata: {
-      cacheControl: 'public, max-age=31536000',
-    },
-  });
-  blobStream.on('finish', () => {
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    resolve(publicUrl);
-  });
-  blobStream.on('error', (e) => {
-    reject(e);
-  });
-  blobStream.end(image);
+  const publicUrl = `${fname}`;
+  resolve(publicUrl);
 });
 
 const saveExtractedResult = async (extractedResultEntity, extractedResult) => {
-  await datastore.save({
-    key: extractedResultEntity[datastore.KEY],
-    data: extractedResult,
-  });
+  //console.log(extractedResult);
 };
 
 const saveExtractedLog = async (logKey, logData) => {
-  await datastore.save({ key: datastore.key(['ExtractedLog', logKey]), data: logData });
+  console.log(logData);
 };
 
 const _extract = async (
@@ -232,6 +203,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
     if (manualResult.title) extractedResult.title = manualResult.title;
     if (manualResult.image) extractedResult.image = manualResult.image;
     if (manualResult.favicon) extractedResult.favicon = manualResult.favicon;
+    console.log('From manualResults: ', extractedResult);
   }
 
   if (!isExtractedResultComplete(extractedResult)) {
@@ -241,6 +213,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
     } catch (e) {
       console.log(`(${logKey}-${seq}) _extract w/o Js throws ${e.name}: ${e.message}`);
     }
+    console.log('From _extract w/o Js: ', extractedResult);
   }
 
   if (!isExtractedResultComplete(extractedResult)) {
@@ -250,6 +223,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
     } catch (e) {
       console.log(`(${logKey}-${seq}) _extract with Js throws ${e.name}: ${e.message}`);
     }
+    console.log('From _extract with Js: ', extractedResult);
   }
 
   if (!isExtractedResultComplete(extractedResult)) {
@@ -269,6 +243,7 @@ const extract = async (extractedResultEntity, logKey, seq) => {
       if (backupResult.favicon && !extractedResult.favicon) {
         extractedResult.favicon = backupResult.favicon;
       }
+      console.log('From backupResults: ', extractedResult);
     }
   }
 
