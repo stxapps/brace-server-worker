@@ -60,7 +60,7 @@ const _extract = async (url, logKey, seq, isJsEnabled, extractedResult) => {
     } else throw e;
   }
 
-  const { host, origin } = extractUrl(url);
+  const { origin } = extractUrl(page.url());
 
   if (!extractedResult.title) {
     const text = await page.evaluate(() => {
@@ -79,6 +79,17 @@ const _extract = async (url, logKey, seq, isJsEnabled, extractedResult) => {
       const cleansedText = cleanText(text);
       if (cleansedText.length > 0 && canTextInDb(cleansedText)) {
         extractedResult.title = cleansedText;
+      }
+    }
+  }
+  if (!extractedResult.title) {
+    const text = await page.title();
+    if (text) {
+      const cleansedText = cleanText(text);
+      if (cleansedText.length > 0 && canTextInDb(cleansedText)) {
+        if (isJsEnabled || !containRedirectWords(cleansedText)) {
+          extractedResult.title = cleansedText;
+        }
       }
     }
   }
@@ -116,19 +127,8 @@ const _extract = async (url, logKey, seq, isJsEnabled, extractedResult) => {
       }
     }
   }
-  if (!extractedResult.title) {
-    const text = await page.title();
-    if (text) {
-      const cleansedText = cleanText(text);
-      if (cleansedText.length > 0 && canTextInDb(cleansedText)) {
-        if (isJsEnabled || !containRedirectWords(cleansedText)) {
-          extractedResult.title = cleansedText;
-        }
-      }
-    }
-  }
 
-  if (!extractedResult.image && host !== 'twitter.com') {
+  if (!extractedResult.image) {
     let image = await page.evaluate(() => {
       const el = [...document.head.getElementsByTagName('meta')].filter(el => {
         const values = ['twitter:image', 'og:image', 'og:image:url'];
