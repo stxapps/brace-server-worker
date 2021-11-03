@@ -19,6 +19,9 @@ const manualResults = {
   'twitter.com*': {
     image: 'https://storage.googleapis.com/brace-static-files/VYleenlIdpxweGqiv6xdDBLSp6GliwAUGEHSuCJNT2ZjcFqB.png',
   },
+  'mobile.twitter.com*': {
+    image: 'https://storage.googleapis.com/brace-static-files/VYleenlIdpxweGqiv6xdDBLSp6GliwAUGEHSuCJNT2ZjcFqB.png',
+  },
 };
 
 const backupResults = {
