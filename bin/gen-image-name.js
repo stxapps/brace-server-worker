@@ -1,4 +1,4 @@
-const { randomString } = require('../utils');
+import { randomString } from '../src/utils';
 
 const genImageName = () => {
   const fname = randomString(48) + '.png';
