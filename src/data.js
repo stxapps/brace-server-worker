@@ -49,12 +49,10 @@ const updateExtract = (extractEntity, extractData) => {
 };
 
 const getExtractEntities = async (status) => {
-  const query = datastore.createQuery(EXTRACT);
-  query.filter('status', status);
-  query.limit(800);
-
+  const query = datastore.createQuery(EXTRACT)
+    .filter('status', '=', status)
+    .limit(800);
   const [extractEntities] = await datastore.runQuery(query);
-
   return extractEntities;
 };
 

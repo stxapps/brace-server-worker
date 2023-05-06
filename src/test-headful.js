@@ -17,7 +17,7 @@ const _extract = async (url) => {
 };
 
 const main = async () => {
-  if (!browser) browser = await puppeteer.launch({ headless: false, executablePath: '/usr/bin/chromium-browser' });
+  if (!browser) browser = await puppeteer.launch({ headless: 'new', executablePath: '/usr/bin/chromium-browser' });
 
   let url;
   //url = 'https://www.wsj.com';

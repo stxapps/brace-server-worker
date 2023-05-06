@@ -294,7 +294,7 @@ const _main = async () => {
 
   if (entities.length > 0) {
     console.log(`(${logKey}) There are entities, launching Puppeteer`);
-    if (!browser) browser = await puppeteer.launch({ headless: true });
+    if (!browser) browser = await puppeteer.launch({ headless: 'new' });
 
     // Shuffle on each round so if Puppeteer hangs on some urls,
     //   others get a chance to be extracted.
