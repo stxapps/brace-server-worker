@@ -210,8 +210,12 @@ const _extract = async (logKey, seq, url, isJsEnabled, result) => {
     }
   }
 
-  await page.close();
-  await context.close();
+  await withTimeout(logKey, seq, () => {
+    return page.close();
+  }, 'page.close() is too long', 4000);
+  await withTimeout(logKey, seq, () => {
+    return context.close();
+  }, 'context.close() is too long', 4000);
 };
 
 const extract = async (logKey, seq, extractEntity) => {
