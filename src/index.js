@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer-extra';
+import PrefsPlugin from 'puppeteer-extra-plugin-user-preferences';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import dataApi from './data'; // Mock test: import dataApi from './mock-data';
@@ -13,6 +14,18 @@ import {
 } from './utils';
 import { manualResults, backupResults } from './results';
 
+// stackoverflow.com/questions/74424735/puppeteer-not-actually-downloading-zip-despite-clicking-link
+puppeteer.use(PrefsPlugin({
+  userPrefs: {
+    download: {
+      prompt_for_download: false,
+      open_pdf_in_system_reader: false,
+    },
+    plugins: {
+      always_open_pdf_externally: false,
+    },
+  },
+}));
 puppeteer.use(StealthPlugin());
 
 let browser;
@@ -43,6 +56,11 @@ const _extract = async (logKey, seq, url, isJsEnabled, result) => {
   await page.setCacheEnabled(false);
   await page.setViewport({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
   await page.setJavaScriptEnabled(isJsEnabled);
+  // stackoverflow.com/questions/74038752/how-to-disable-or-cancel-all-downloads
+  // Being deprecated. Use request interception instead by check resourceType and url.
+  await (await page.target().createCDPSession()).send('Page.setDownloadBehavior', {
+    behavior: 'deny', downloadPath: '/dev/null',
+  });
   try {
     await page.goto(url, { timeout: 24000, waitUntil: 'networkidle0' });
   } catch (e) {

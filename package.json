@@ -3,21 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "engines": {
-    "node": "16.x.x"
+    "node": "20.x.x"
   },
   "type": "module",
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node src/index.js",
-    "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/legacy_credentials/brace@brace.to/adc.json node --experimental-specifier-resolution=node src/index.js",
+    "start": "node --import=specifier-resolution-node/register src/index.js",
+    "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/legacy_credentials/brace@brace.to/adc.json node --import=specifier-resolution-node/register src/index.js",
+    "deploy": "gcloud run jobs deploy brace-server-worker --source . --tasks=1 --max-retries=0 --task-timeout=20m --project=brace-001",
     "gen-image-name": "node --experimental-specifier-resolution=node bin/gen-image-name.js",
     "test-headful": "node --experimental-specifier-resolution=node src/test-headful.js"
   },
   "dependencies": {
-    "@google-cloud/datastore": "^7.5.1",
-    "@google-cloud/storage": "^6.10.0",
-    "puppeteer": "^20.1.1",
+    "@google-cloud/datastore": "^8.3.0",
+    "@google-cloud/storage": "^7.7.0",
+    "puppeteer": "^21.6.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-user-preferences": "^2.4.1",
+    "specifier-resolution-node": "^1.1.1",
     "url-parse": "^1.5.10"
   }
 }
