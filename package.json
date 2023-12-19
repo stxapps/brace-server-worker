@@ -7,7 +7,6 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node --import=specifier-resolution-node/register src/index.js",
     "start-local": "GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/legacy_credentials/brace@brace.to/adc.json node --import=specifier-resolution-node/register src/index.js",
     "deploy": "gcloud run jobs deploy brace-server-worker --source . --tasks=1 --max-retries=0 --task-timeout=20m --region=us-central1 --project=brace-001",
     "gen-image-name": "node --experimental-specifier-resolution=node bin/gen-image-name.js",
