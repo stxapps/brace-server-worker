@@ -1,4 +1,4 @@
-import { Datastore } from '@google-cloud/datastore';
+import { Datastore, PropertyFilter } from '@google-cloud/datastore';
 import { Storage } from '@google-cloud/storage';
 
 import { EXTRACT_LOG, EXTRACT, BRACE_STATIC_FILES } from './const';
@@ -50,7 +50,7 @@ const updateExtract = (extractEntity, extractData) => {
 
 const getExtractEntities = async (status) => {
   const query = datastore.createQuery(EXTRACT)
-    .filter('status', '=', status)
+    .filter(new PropertyFilter('status', '=', status))
     .limit(800);
   const [extractEntities] = await datastore.runQuery(query);
   return extractEntities;
