@@ -13,7 +13,7 @@ export const runAsyncWrapper = (callback) => {
 };
 
 export const randomString = (length) => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const charactersLength = characters.length;
 
   let result = '';
@@ -207,6 +207,7 @@ export const containRedirectWords = (text) => {
   text = text.toLowerCase();
   if (text.includes('redirect')) return true;
   if (text.includes('javascript')) return true;
+  if (text === 'x.com') return true;
   return false;
 };
 
