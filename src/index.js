@@ -10,7 +10,7 @@ import {
 import {
   randomString, extractUrl, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
   deriveExtractedTitle, isExtractedResultComplete, canTextInDb, containRedirectWords,
-  shuffleArray,
+  shuffleArray, sleep,
 } from './utils';
 import { manualResults, backupResults } from './results';
 
@@ -51,7 +51,7 @@ const _extract = async (logKey, seq, url, isJsEnabled, result) => {
   //   other async processes will still launch it.
   //if (!browser) browser = await puppeteer.launch({ headless: true });
 
-  const context = await browser.createIncognitoBrowserContext();
+  const context = await browser.createBrowserContext();
   const page = await context.newPage();
   await page.setCacheEnabled(false);
   await page.setViewport({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
@@ -306,6 +306,26 @@ const extract = async (logKey, seq, extractEntity) => {
   return result;
 };
 
+const launchPuppeteer = async () => {
+  if (browser) return;
+
+  try {
+    browser = await puppeteer.launch({ headless: true });
+  } catch (err) {
+    console.log('Error launch Puppeteer, wait and try again:', err);
+    await sleep(400);
+    try {
+      browser = await puppeteer.launch({ headless: true });
+    } catch (err) {
+      console.log('Error launch Puppeteer, try no sandbox:', err);
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+    }
+  }
+};
+
 const _main = async () => {
   const startDate = new Date();
   const logKey = `${startDate.getTime()}-${randomString(4)}`;
@@ -316,7 +336,7 @@ const _main = async () => {
 
   if (entities.length > 0) {
     console.log(`(${logKey}) There are entities, launching Puppeteer`);
-    if (!browser) browser = await puppeteer.launch({ headless: 'new' });
+    await launchPuppeteer();
 
     // Shuffle on each round so if Puppeteer hangs on some urls,
     //   others get a chance to be extracted.

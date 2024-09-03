@@ -1,5 +1,5 @@
 # github.com/GoogleCloudPlatform/jobs-demos/tree/main/screenshot
-FROM ghcr.io/puppeteer/puppeteer:21.6.1
+FROM ghcr.io/puppeteer/puppeteer:23.2.1
 
 # github.com/nodejs/docker-node/blob/main/docs/BestPractices.md
 ENV NPM_CONFIG_PREFIX=/home/pptruser/.npm-global

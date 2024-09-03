@@ -12,6 +12,10 @@ export const runAsyncWrapper = (callback) => {
   }
 };
 
+export const sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const randomString = (length) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const charactersLength = characters.length;

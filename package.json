@@ -13,9 +13,9 @@
     "test-headful": "node --import=specifier-resolution-node/register src/test-headful.js"
   },
   "dependencies": {
-    "@google-cloud/datastore": "^8.3.0",
-    "@google-cloud/storage": "^7.7.0",
-    "puppeteer": "^21.6.1",
+    "@google-cloud/datastore": "^9.1.0",
+    "@google-cloud/storage": "^7.12.1",
+    "puppeteer": "^23.2.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "puppeteer-extra-plugin-user-preferences": "^2.4.1",
