@@ -1,10 +1,6 @@
 import Url from 'url-parse';
 
-import {
-  HTTP,
-  VALID_URL, NO_URL, ASK_CONFIRM_URL,
-  IGNORED_URL_PARAMS,
-} from './const';
+import { HTTP, VALID_URL, NO_URL, ASK_CONFIRM_URL, IGNORED_URL_PARAMS } from './const';
 
 export const runAsyncWrapper = (callback) => {
   return function (req, res, next) {
@@ -14,6 +10,14 @@ export const runAsyncWrapper = (callback) => {
 
 export const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+export const isObject = (val) => {
+  return typeof val === 'object' && val !== null;
+};
+
+export const isString = val => {
+  return typeof val === 'string' || val instanceof String;
 };
 
 export const randomString = (length) => {
@@ -222,3 +226,15 @@ export const shuffleArray = array => {
   }
   return array;
 }
+
+export const isNetworkClosedError = (err) => {
+  if (!isObject(err) || !isString(err.message)) return false;
+
+  const message = err.message.toLowerCase();
+  if (message.includes('navigating frame was detached')) return true;
+  if (message.includes('target closed')) return true;
+  if (message.includes('protocol error')) return true;
+  if (message.includes('connection closed')) return true;
+
+  return false;
+};

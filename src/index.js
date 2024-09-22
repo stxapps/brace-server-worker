@@ -10,7 +10,7 @@ import {
 import {
   randomString, extractUrl, removeUrlProtocolAndSlashes, cleanText, getExtractedResult,
   deriveExtractedTitle, isExtractedResultComplete, canTextInDb, containRedirectWords,
-  shuffleArray, sleep,
+  shuffleArray, sleep, isNetworkClosedError,
 } from './utils';
 import { manualResults, backupResults } from './results';
 
@@ -264,12 +264,14 @@ const extract = async (logKey, seq, extractEntity) => {
     }
   }
 
+  let isNCError = false;
   if (!isExtractedResultComplete(result)) {
     try {
       await _extract(logKey, seq, url, true, result);
       console.log(`(${logKey}-${seq}) _extract with Js finished`);
     } catch (e) {
       console.log(`(${logKey}-${seq}) _extract with Js throws ${e.name}: ${e.message}`);
+      isNCError = isNetworkClosedError(e);
     }
   }
 
@@ -291,6 +293,11 @@ const extract = async (logKey, seq, extractEntity) => {
         result.favicon = backupResult.favicon;
       }
     }
+  }
+
+  if (!isExtractedResultComplete(result) && isNCError) {
+    result.status = EXTRACT_ERROR;
+    return result;
   }
 
   result.status = EXTRACT_OK;
@@ -330,6 +337,15 @@ const _main = async () => {
   const startDate = new Date();
   const logKey = `${startDate.getTime()}-${randomString(4)}`;
   console.log(`(${logKey}) Worker starts on ${startDate.toISOString()}`);
+
+  process.on('SIGTERM', () => {
+    // When GCloud Run timeouts, network is closed before the process is killed.
+    // Extraction is still running but Puppeteer gets Protocol error: Connection closed.
+    // All extractResults have status: extracted, but blank title, image, and favicon.
+    // When error, it's fast, can extract hundreds in seconds.
+    console.log(`(${logKey}) received SIGTERM`);
+    process.exit(0);
+  });
 
   let entities = await dataApi.getExtractEntities(EXTRACT_INIT);
   console.log(`(${logKey}) Got ${entities.length} Extract entities`);
