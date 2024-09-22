@@ -1,6 +1,6 @@
 {
   "name": "brace-server-worker",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "engines": {
     "node": "20.x.x"
