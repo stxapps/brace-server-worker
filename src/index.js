@@ -1,6 +1,4 @@
-import puppeteer from 'puppeteer-extra';
-import PrefsPlugin from 'puppeteer-extra-plugin-user-preferences';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import puppeteer from 'puppeteer';
 
 import dataApi from './data'; // Mock test: import dataApi from './mock-data';
 import {
@@ -13,20 +11,6 @@ import {
   shuffleArray, sleep, isNetworkClosedError,
 } from './utils';
 import { manualResults, backupResults } from './results';
-
-// stackoverflow.com/questions/74424735/puppeteer-not-actually-downloading-zip-despite-clicking-link
-puppeteer.use(PrefsPlugin({
-  userPrefs: {
-    download: {
-      prompt_for_download: false,
-      open_pdf_in_system_reader: false,
-    },
-    plugins: {
-      always_open_pdf_externally: false,
-    },
-  },
-}));
-puppeteer.use(StealthPlugin());
 
 let browser;
 

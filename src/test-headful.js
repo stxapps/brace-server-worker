@@ -1,14 +1,11 @@
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import puppeteer from 'puppeteer';
 
 import { PAGE_WIDTH, PAGE_HEIGHT } from './const';
-
-puppeteer.use(StealthPlugin());
 
 let browser;
 
 const _extract = async (url) => {
-  const context = await browser.createIncognitoBrowserContext();
+  const context = await browser.createBrowserContext();
   const page = await context.newPage();
   await page.setCacheEnabled(false);
   await page.setViewport({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
